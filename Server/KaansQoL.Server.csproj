@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Kaan's QoL - Server-Teil (SPT 4.1.6, net10): Balsam-Dauer + Alle Ausgaenge.
+       Bauen:                dotnet build -c Release
+       Bauen + installieren: dotnet build -c Release -p:Installieren=true
+       Ohne den Schalter wird NICHTS ins Spiel kopiert. Alte Server-Mods (BalsamDauer, AlleAusgaenge)
+       entfernt der Bau nie - die verschiebt man beim Einspielen von Hand (siehe README). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>KaansQoL.Server</AssemblyName>
+    <RootNamespace>KaansQoL.Server</RootNamespace>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <NoWarn>$(NoWarn);CS1701;CS1702;NU1701</NoWarn>
+    <GameDir Condition="'$(GameDir)' == ''">/mnt/nvmegames/Games/SPT-416</GameDir>
+    <ServerDir>$(GameDir)/SPT_Runtime</ServerDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="SPTarkov.Server.Core"><HintPath>$(ServerDir)/SPTarkov.Server.Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTarkov.DI"><HintPath>$(ServerDir)/SPTarkov.DI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SPTarkov.Common"><HintPath>$(ServerDir)/SPTarkov.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="SemanticVersioning"><HintPath>$(ServerDir)/SemanticVersioning.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <!-- Die config.json wird NICHT mitkopiert, wenn sie drueben schon liegt - sonst waeren die
+       Einstellungen nach jedem Bau wieder zurueckgesetzt. Fehlt sie, legt der Mod sie beim ersten
+       Start selbst an (und uebernimmt dabei die Werte der alten Mods BalsamDauer/AlleAusgaenge). -->
+  <Target Name="InsSpiel" AfterTargets="Build" Condition="'$(Installieren)' == 'true'">
+    <MakeDir Directories="$(ServerDir)/user/mods/KaansQoL" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ServerDir)/user/mods/KaansQoL" />
+    <Message Importance="high" Text="-> user/mods/KaansQoL/ (Server neu starten)" />
+  </Target>
+  <Target Name="NichtInstalliert" AfterTargets="Build" Condition="'$(Installieren)' != 'true'">
+    <Message Importance="high" Text="Gebaut: $(TargetPath) - NICHT installiert (dafuer: -p:Installieren=true)" />
+  </Target>
+
+</Project>
