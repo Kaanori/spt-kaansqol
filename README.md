@@ -17,7 +17,7 @@ bug, please open an [issue](https://github.com/Kaanori/spt-kaansqol/issues).
 
 ## Installation
 
-1. Download `KaansQoL-1.0.0.zip` from the [Releases](https://github.com/Kaanori/spt-kaansqol/releases) page.
+1. Download `KaansQoL-1.0.1.zip` from the [Releases](https://github.com/Kaanori/spt-kaansqol/releases) page.
 2. Extract it **into your SPT game folder** (the folder that contains `EscapeFromTarkov.exe`).
    The ZIP already has the right layout; the mod ends up in `BepInEx/plugins/` (client part) and `SPT_Runtime/user/mods/KaansQoL/` (server part).
    On Windows, make sure "Extract All" does not add an extra subfolder.
@@ -52,7 +52,7 @@ Delete the mod's files from `BepInEx/plugins/` (client part) and `SPT_Runtime/us
 | | |
 |---|---|
 | **Tested with** | SPT 4.1.6 (EFT `0.16.9.40743`), BepInEx 5, developed and played on Linux (Proton). The server part also runs on Windows. |
-| **Client** | `KaansQoL.dll` -> `BepInEx/plugins/KaansQoL/` (GUID `com.kaan.qol`, version 1.0.0) |
+| **Client** | `KaansQoL.dll` -> `BepInEx/plugins/KaansQoL/` (GUID `com.kaan.qol`, version 1.0.1) |
 | **Server** | `KaansQoL.Server.dll` -> `SPT_Runtime/user/mods/KaansQoL/` (net10, SPT 4.1) |
 | **Optional partners** | DynamicMaps (module 12), Trenchfoot-BeltSlot (module 11), Manimal's Icebreaker (module 10), ORBIT (module 09, only for the bot lock-out) - a module whose partner is missing simply stays off |
 | **License** | MIT |

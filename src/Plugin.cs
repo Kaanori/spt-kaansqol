@@ -52,7 +52,7 @@ namespace KaansQoL
 	public class Plugin : BaseUnityPlugin
 	{
 		internal const string Guid = "com.kaan.qol";
-		internal const string Version = "1.0.0";
+		internal const string Version = "1.0.1";
 
 		internal static ManualLogSource Log;
 

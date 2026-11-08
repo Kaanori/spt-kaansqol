@@ -87,6 +87,7 @@ namespace KaansQoL.Sortierknopf
 		{
 			h.PatchAll(typeof(AnsichtPatch));
 			h.PatchAll(typeof(ImRaidPatch));
+			h.PatchAll(typeof(RaidOperationPatch));
 			h.PatchAll(typeof(SuchstandPatch));
 		}
 	}
@@ -199,15 +200,13 @@ namespace KaansQoL.Sortierknopf
 					Platzieren(klon.transform as RectTransform, vorlage.transform as RectTransform);
 					klon.gameObject.SetActive(value: true);
 					Anrichten(klon, steuerung, compoundItem);
-					// Eigener Versuch: SetUnlockStatus greift auf ein
-					// serialisiertes Feld zu, das im Klon fehlen kann.
-					try
+					// _canvasGroup ist schon in der Vorlage des Lagers leer -
+					// das Spiel ruft SetUnlockStatus dort selbst nie auf. Ohne
+					// CanvasGroup ist der Knopf ohnehin voll sichtbar und
+					// bedienbar; nur wenn eine da ist, wird sie freigeschaltet.
+					if (klon._canvasGroup != null)
 					{
 						klon.SetUnlockStatus(value: true);
-					}
-					catch (Exception ex2)
-					{
-						Modul.Log.LogWarning("SetUnlockStatus uebersprungen: " + ex2.Message);
 					}
 					Modul.Log.LogInfo("Sortierknopf gesetzt an " + compoundItem.TemplateId
 						+ " | Kette: " + Kette(__instance.transform));
@@ -563,6 +562,84 @@ namespace KaansQoL.Sortierknopf
 	}
 
 	// ---------------------------------------------------------------
+	//  Sortieren im Raid: die fehlende Operation
+	//
+	//  Die Freigabe oben reicht allein nicht. Der Sortierknopf baut ein
+	//  ApplySortItemsPositionResult und gibt es an
+	//  TryRunNetworkTransaction. Dort wird daraus eine Operation:
+	//
+	//    - Im Menue macht BackEndInventoryController
+	//      .ConvertOperationResultToOperation daraus eine
+	//      ApplyInventoryChangesOperation. Die legt die Gegenstaende um
+	//      und meldet beim Abschluss (Dispose) alle Ereignisse - erst
+	//      dadurch baut sich die offene Rasteransicht neu auf.
+	//    - Im Raid laeuft die Grundfassung in ItemController. Die kennt
+	//      das Sortieren nicht und wirft
+	//        "operationResult is of unexpected type
+	//         ApplySortItemsPositionResult"
+	//      (steht in Logs/.../errors.log).
+	//
+	//  Folgen der Ausnahme im Raid:
+	//    - Ohne fremde Mods: es wird gar nicht sortiert, und der Knopf
+	//      bleibt bis zum Schliessen "beschaeftigt" (ChangeProgress(false)
+	//      wird nie erreicht).
+	//    - Mit UIFixes ("Stack before sort"): UIFixes sortiert mit
+	//      simulate:false, die Gegenstaende liegen also schon um - aber
+	//      kein einziges Ereignis wird gemeldet. Die Ansicht bleibt alt,
+	//      der Suchstand behaelt die alten Plaetze, und nach dem
+	//      Wiederoeffnen erscheinen die verschobenen Gegenstaende als
+	//      schraffierte "undurchsuchte" Felder.
+	//
+	//  Abhilfe: im Raid dieselbe Operation verwenden wie im Menue.
+	//  ApplyInventoryChangesOperation arbeitet rein lokal (Entfernen +
+	//  Ablegen); nur ToDescriptor() waere fuer echtes Online-Spiel
+	//  noetig, und das ruft der Einzelspieler-Raid nie auf.
+	//  Eingegrenzt wie die Freigabe: nur die Steuerung der eigenen
+	//  Spielfigur und nur, wenn sie diesen Behaelter sortieren darf
+	//  (also nie Kisten oder Koerper). Das Menue erreicht diesen Patch
+	//  nie - BackEndInventoryController erledigt das Sortieren vorher
+	//  selbst.
+	// ---------------------------------------------------------------
+	[HarmonyPatch]
+	internal static class RaidOperationPatch
+	{
+		[HarmonyTargetMethod]
+		private static MethodBase Ziel()
+		{
+			return AccessTools.Method(typeof(ItemController),
+				nameof(ItemController.ConvertOperationResultToOperation));
+		}
+
+		[HarmonyPrefix]
+		private static bool Vorher(ItemController __instance, IOperationResult operationResult,
+								   ref EFT.InventoryLogic.Operations.AbstractOperation __result)
+		{
+			try
+			{
+				if (!(operationResult is ApplySortItemsPositionResult sortieren)
+					|| Modul.ImRaid == null || !Modul.ImRaid.Value)
+				{
+					return true;
+				}
+				if (!(__instance is Player.PlayerInventoryController steuerung)
+					|| sortieren._sortedItem == null
+					|| !steuerung.IsAllowedToSort(sortieren._sortedItem))
+				{
+					return true;
+				}
+				__result = new EFT.InventoryLogic.Operations.ApplyInventoryChangesOperation(
+					steuerung.GetAndIncrementNextOperationId(), steuerung, sortieren);
+				return false;
+			}
+			catch (Exception ex)
+			{
+				Modul.Log.LogError("Sortierknopf: Raid-Operation - " + ex);
+				return true;
+			}
+		}
+	}
+
+	// ---------------------------------------------------------------
 	//  Sortieren im Raid: Gegenstaende bleiben "bekannt"
 	//
 	//  Im Raid ist jeder Behaelter des Spielers durchsuchbar
@@ -578,7 +655,9 @@ namespace KaansQoL.Sortierknopf
 	//  gezeigt, bis man "Durchsuchen" drueckt.
 	//
 	//  Das Spiel selbst kennt das Problem nicht, weil es im Raid gar
-	//  nicht sortieren laesst - erst ImRaidPatch oben macht es moeglich.
+	//  nicht sortieren laesst - erst ImRaidPatch und RaidOperationPatch
+	//  oben machen es moeglich (RaiseEvents laeuft im Raid ueber
+	//  ApplyInventoryChangesOperation.Dispose).
 	//  Darum hier: Was vor dem Sortieren bekannt war, ist es am neuen
 	//  Platz auch. Laeuft VOR dem Melden der Ereignisse, damit die
 	//  Ansichten gleich als bekannte Gegenstaende entstehen. Ausserhalb

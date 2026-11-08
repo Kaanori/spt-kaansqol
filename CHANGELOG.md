@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1 - 2026-11-07
+
+**Fixed**
+- **03 Sort Button**, sorting during a raid: the raid inventory controller had no operation for the sort result
+  (`operationResult is of unexpected type ApplySortItemsPositionResult` in `errors.log`). Without other mods nothing
+  was sorted and the button stayed busy; with UIFixes "Stack before sort" the items were moved but no events were
+  raised, so the open grid kept its old picture and the moved items showed up hatched ("not searched") after
+  reopening. In raid the sort now runs as the same `ApplyInventoryChangesOperation` the stash uses, so the open view
+  refreshes at once and the items stay known. Only for the player's own containers; the stash path is unchanged.
+- **03 Sort Button**: no more "SetUnlockStatus skipped" warning when the button is created (the stash template has
+  no canvas group; nothing was broken).
+
 ## 1.0.0 - 2026-11-07
 
 First combined release. Client plugin `com.kaan.qol` + server mod `KaansQoL`.
