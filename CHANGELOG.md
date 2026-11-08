@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.1.0 - 2026-11-08
+
+Three more of the author's mods moved in. Client plugin `com.kaan.qol` + server mod `KaansQoL`, both 1.1.0.
+
+**Merged (former stand-alone mods):**
+ZonenKills 1.0.0, GespraechsFolgen 1.0.0 (client + server route), KeinAufgabenFehlschlag 1.0.0 (server).
+
+**New modules / parts**
+- Module **14 Zone Kills**: a kill counts for zone quests while *you* stand in the zone, wherever the enemy is
+  (vanilla only checks the zones of the victim). Kills of enemies inside the zone still count.
+- Module **15 Dialogue Consequences**: under each answer in VisitAPI conversations it shows, before you pick it, which
+  quests the answer completes, fails or unlocks (inline lines or a tooltip marker). Needs VisitAPI (soft dependency).
+  Reads quest data through the server route `/gespraechsfolgen/quests`, which is now part of `KaansQoL.Server.dll`
+  (the URL is unchanged).
+- Server part **No quest failures** (`noQuestFailures` in `config.json`): quests no longer fail through play (kills,
+  death, reputation, wrong place, time limits); accepted daily/weekly quests survive the reset with their progress.
+  Story branches (quest-vs-quest "either/or" and dialogue-choice variables) are kept on purpose - Dialogue
+  Consequences shows what they do. Optional: lift the one-raid rule, remove wait times, per-quest exceptions.
+
+**Migration / safety**
+- `Zone Kills` and `Dialogue Consequences` take over the settings of the old `com.kaan.zonenkills.cfg` /
+  `com.kaan.gespraechsfolgen.cfg` on the first start; they stay off while the old DLL is still installed.
+- The server config section `noQuestFailures` is filled from the old `user/mods/KeinAufgabenFehlschlag/config.json`
+  (or `kein-aufgaben-fehlschlag.json` copied into the KaansQoL folder). An existing 1.0.x `config.json` gets the new
+  section added once; its other values stay.
+- If the old server mod `KeinAufgabenFehlschlag` is still installed, the quest rebuild stays off (log warning); if the
+  old `GespraechsFolgen` server mod is still installed, the new route passes through and the old one answers.
+- Tests: new `tests/GespraechsFolgenTest` (offline check of the dialogue/quest calculation on the real "Blue Fire" case);
+  `ServerConfigTest` and `OfflineTest` extended (migration, duplicate guard, new config section).
+
 ## 1.0.1 - 2026-11-07
 
 **Fixed**

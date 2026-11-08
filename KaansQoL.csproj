@@ -8,7 +8,7 @@
     <TargetFramework>net471</TargetFramework>
     <AssemblyName>KaansQoL</AssemblyName>
     <RootNamespace>KaansQoL</RootNamespace>
-    <Version>1.0.1</Version>
+    <Version>1.1.0</Version>
     <LangVersion>latest</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -45,6 +45,8 @@
     <Reference Include="Sirenix.Serialization"><HintPath>$(GameDir)/EscapeFromTarkov_Data/Managed/Sirenix.Serialization.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Sirenix.Utilities"><HintPath>$(GameDir)/EscapeFromTarkov_Data/Managed/Sirenix.Utilities.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Sirenix.OdinInspector.Attributes"><HintPath>$(GameDir)/EscapeFromTarkov_Data/Managed/Sirenix.OdinInspector.Attributes.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="spt-common"><HintPath>$(GameDir)/BepInEx/plugins/spt/spt-common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Comfort.Unity"><HintPath>$(GameDir)/EscapeFromTarkov_Data/Managed/Comfort.Unity.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="spt-reflection"><HintPath>$(GameDir)/BepInEx/plugins/spt/spt-reflection.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="BepInEx"><HintPath>$(GameDir)/BepInEx/core/BepInEx.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="0Harmony"><HintPath>$(GameDir)/BepInEx/core/0Harmony.dll</HintPath><Private>false</Private></Reference>

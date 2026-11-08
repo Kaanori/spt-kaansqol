@@ -4,8 +4,12 @@
 //  Fasst die frueheren Einzel-Mods AutoLaufen, Blickrichtung,
 //  Sortierknopf, AllesAnnehmen, BehaelterOhneGewicht, Windstille,
 //  KeinSchmerzmittelFilter, KartentuerHacken, TuerAbschliessen,
-//  HeliOhneFackel, GuertelFix und PfeilSpitze zusammen und bringt
-//  das neue Modul "Magazine Swap" mit.
+//  HeliOhneFackel, GuertelFix, PfeilSpitze, ZonenKills und
+//  GespraechsFolgen zusammen und bringt das neue Modul
+//  "Magazine Swap" mit. Seit 1.1.0 gehoeren die Aufgaben-Module
+//  (ZonenKills, GespraechsFolgen) dazu; der Server-Teil bringt
+//  zusaetzlich "Kein Aufgaben-Fehlschlag" und den Datenpunkt fuer
+//  die Gespraechsfolgen mit (siehe Server/).
 //
 //  So funktioniert es:
 //   - Jedes Modul steht in src/Module/<Name>/ und hat in F12 eine
@@ -44,15 +48,18 @@ namespace KaansQoL
 	[BepInDependency("kaan.heliohnefackel", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.kaan.guertelfix", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.kaan.pfeilspitze", BepInDependency.DependencyFlags.SoftDependency)]
+	[BepInDependency("com.kaan.zonenkills", BepInDependency.DependencyFlags.SoftDependency)]
+	[BepInDependency("com.kaan.gespraechsfolgen", BepInDependency.DependencyFlags.SoftDependency)]
 	// Fremd-Mods, die einzelne Module brauchen bzw. vor denen sie laden sollen.
 	[BepInDependency("com.manimal.icebreaker", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.trenchfoot.beltslot", BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency("com.mpstark.dynamicmaps", BepInDependency.DependencyFlags.SoftDependency)]
+	[BepInDependency(GespraechsFolgen.GespraechsFolgenModule.VisitApiGuid, BepInDependency.DependencyFlags.SoftDependency)]
 	[BepInDependency(TuerAbschliessen.OrbitSperre.OrbitGuid, BepInDependency.DependencyFlags.SoftDependency)]
 	public class Plugin : BaseUnityPlugin
 	{
 		internal const string Guid = "com.kaan.qol";
-		internal const string Version = "1.0.1";
+		internal const string Version = "1.1.0";
 
 		internal static ManualLogSource Log;
 
@@ -110,7 +117,9 @@ namespace KaansQoL
 				new HeliOhneFackel.HeliOhneFackelModule(),
 				new GuertelFix.GuertelFixModule(),
 				new PfeilSpitze.PfeilSpitzeModule(),
-				new MagazineSwap.MagazineSwapModule()
+				new MagazineSwap.MagazineSwapModule(),
+				new ZonenKills.ZonenKillsModule(),
+				new GespraechsFolgen.GespraechsFolgenModule()
 			};
 
 			HashSet<ConfigDefinition> vorher = Migration.Vorhandene(cfg);

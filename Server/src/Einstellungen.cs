@@ -5,10 +5,14 @@
 //  Die alten Mods hatten je eine kleine JSON-Datei:
 //    user/mods/BalsamDauer/balsam.json       { minuten, effekte[] }
 //    user/mods/AlleAusgaenge/ausgaenge.json  { chance, einstiegspunkte, zeitfenster }
+//    user/mods/KeinAufgabenFehlschlag/config.json  { "Keine Fehlschlaege", "Keine Zeitlimits", ... }
 //  Gibt es beim Start noch KEINE config.json, wird sie angelegt und
 //  mit den Werten aus diesen Dateien gefuellt (soweit sie existieren).
 //  Sind die alten Mod-Ordner schon weggeraeumt, reicht es, balsam.json bzw.
-//  ausgaenge.json vorher in den Ordner dieses Mods zu kopieren.
+//  ausgaenge.json vorher in den Ordner dieses Mods zu kopieren (die config.json des
+//  Aufgaben-Mods als kein-aufgaben-fehlschlag.json - sie heisst sonst wie unsere).
+//  Gibt es die config.json schon, aber noch ohne Abschnitt noQuestFailures (Fassung 1.0.x),
+//  wird nur dieser Abschnitt aus dem alten Aufgaben-Mod nachgeholt.
 //  Die alten Dateien werden nur gelesen, nie veraendert oder geloescht.
 //
 //  Diese Datei haengt nicht am SPT-Server - der Offline-Test benutzt sie direkt.
@@ -33,10 +37,24 @@ public sealed class AusgangsEinstellungen
 	public bool TimeWindows { get; set; } = true;
 }
 
+public sealed class FehlschlagEinstellungen
+{
+	public bool Enabled { get; set; } = true;
+	public bool NoFailures { get; set; } = true;
+	public bool NoTimeLimits { get; set; } = true;
+	public bool IncludeDailies { get; set; } = true;
+	public bool KeepStoryBranches { get; set; } = true;
+	public bool LiftSingleRaid { get; set; } = false;
+	public bool NoWaitTimes { get; set; } = false;
+	public List<string> Exceptions { get; set; } = new();
+	public bool VerboseLog { get; set; } = true;
+}
+
 public sealed class QolEinstellungen
 {
 	public BalsamEinstellungen BalsamDuration { get; set; } = new();
 	public AusgangsEinstellungen AllExtracts { get; set; } = new();
+	public FehlschlagEinstellungen NoQuestFailures { get; set; } = new();
 }
 
 public static class Einstellungen
@@ -63,7 +81,17 @@ public static class Einstellungen
 			try
 			{
 				string text = File.ReadAllText(datei);
-				return JsonSerializer.Deserialize<QolEinstellungen>(text, Optionen) ?? new QolEinstellungen();
+				QolEinstellungen vorh = JsonSerializer.Deserialize<QolEinstellungen>(text, Optionen) ?? new QolEinstellungen();
+				// Fassung 1.0.x kannte den Abschnitt noQuestFailures noch nicht: einmalig aus dem alten Mod holen.
+				if (JsonNode.Parse(text, documentOptions: new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true }) is JsonObject wurzel
+					&& !wurzel.ContainsKey("noQuestFailures"))
+				{
+					string mods0 = Path.GetDirectoryName(modOrdner.TrimEnd(Path.DirectorySeparatorChar, '/')) ?? ".";
+					int q0 = UebernehmeAlteAufgaben(mods0, modOrdner, vorh.NoQuestFailures, warnung);
+					if (q0 > 0) info("Migrated " + q0 + " settings from KeinAufgabenFehlschlag (config.json)");
+					Speichern(modOrdner, vorh, warnung);
+				}
+				return vorh;
 			}
 			catch (Exception ex)
 			{
@@ -92,8 +120,22 @@ public static class Einstellungen
 		}
 		if (a > 0) info("Migrated " + a + " settings from AlleAusgaenge (ausgaenge.json)");
 
+		int q = UebernehmeAlteAufgaben(modsOrdner, modOrdner, neu.NoQuestFailures, warnung);
+		if (q > 0) info("Migrated " + q + " settings from KeinAufgabenFehlschlag (config.json)");
+
 		Speichern(modOrdner, neu, warnung);
 		return neu;
+	}
+
+	/// <summary>Erst der alte Mod-Ordner, dann - falls der schon weggeraeumt wurde - eine hierher kopierte Datei.</summary>
+	private static int UebernehmeAlteAufgaben(string modsOrdner, string modOrdner, FehlschlagEinstellungen ziel, Action<string> warnung)
+	{
+		foreach (string pfad in new[] { Path.Combine(modsOrdner, "KeinAufgabenFehlschlag", "config.json"), Path.Combine(modOrdner, "kein-aufgaben-fehlschlag.json") })
+		{
+			int n = UebernehmeAufgaben(pfad, ziel, warnung);
+			if (n > 0) return n;
+		}
+		return 0;
 	}
 
 	public static void Speichern(string modOrdner, QolEinstellungen e, Action<string> warnung)
@@ -108,7 +150,9 @@ public static class Einstellungen
 				{
 					["_hint"] = "Kaan's QoL (server part). Takes effect on the next server start, no rebuild needed. "
 						+ "balsamDuration: minutes = how long Golden Star Balm effects last, effects = which damage effects get that duration. "
-						+ "allExtracts: makes every extract always reachable (chance 100 %, all entry points, time windows open; trains stay excluded)."
+						+ "allExtracts: makes every extract always reachable (chance 100 %, all entry points, time windows open; trains stay excluded). "
+						+ "noQuestFailures: quests no longer fail by playing (kills, death, reputation, time limits); story branches (quest-vs-quest, dialogue choices) are kept on purpose. "
+						+ "Set enabled to false to switch it off. exceptions = quest ids or internal names that are not touched; liftSingleRaid / noWaitTimes are extra and off by default."
 				};
 				foreach (var kv in o.ToList())
 				{
@@ -180,6 +224,37 @@ public static class Einstellungen
 		if (Lies("chance", b => ziel.Chance = b)) n++;
 		if (Lies("einstiegspunkte", b => ziel.EntryPoints = b)) n++;
 		if (Lies("zeitfenster", b => ziel.TimeWindows = b)) n++;
+		return n;
+	}
+
+	/// <summary>config.json des alten Aufgaben-Mods (deutsche Schluessel) -> NoQuestFailures. Zahl der uebernommenen Einstellungen.</summary>
+	public static int UebernehmeAufgaben(string pfad, FehlschlagEinstellungen ziel, Action<string> warnung)
+	{
+		JsonObject? o = LiesObjekt(pfad, warnung);
+		if (o == null) return 0;
+		int n = 0;
+		bool Lies(string name, Action<bool> setze)
+		{
+			if (o[name] is JsonValue v && v.TryGetValue<bool>(out bool b))
+			{
+				setze(b);
+				return true;
+			}
+			return false;
+		}
+		if (Lies("Keine Fehlschlaege", b => ziel.NoFailures = b)) n++;
+		if (Lies("Keine Zeitlimits", b => ziel.NoTimeLimits = b)) n++;
+		if (Lies("Auch Taeglich/Woechentlich", b => ziel.IncludeDailies = b)) n++;
+		if (Lies("Story-Verzweigungen behalten", b => ziel.KeepStoryBranches = b)) n++;
+		if (Lies("Ein-Raid-Pflicht aufheben", b => ziel.LiftSingleRaid = b)) n++;
+		if (Lies("Keine Wartezeiten", b => ziel.NoWaitTimes = b)) n++;
+		if (Lies("Ausfuehrliches Protokoll", b => ziel.VerboseLog = b)) n++;
+		if (o["Ausnahmen"] is JsonArray arr)
+		{
+			ziel.Exceptions = arr.Select(x => (x as JsonValue)?.TryGetValue<string>(out var t) == true ? t : null)
+				.Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t!).ToList();
+			n++;
+		}
 		return n;
 	}
 }

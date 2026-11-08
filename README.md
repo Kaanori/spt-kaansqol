@@ -17,7 +17,7 @@ bug, please open an [issue](https://github.com/Kaanori/spt-kaansqol/issues).
 
 ## Installation
 
-1. Download `KaansQoL-1.0.1.zip` from the [Releases](https://github.com/Kaanori/spt-kaansqol/releases) page.
+1. Download `KaansQoL-1.1.0.zip` from the [Releases](https://github.com/Kaanori/spt-kaansqol/releases) page.
 2. Extract it **into your SPT game folder** (the folder that contains `EscapeFromTarkov.exe`).
    The ZIP already has the right layout; the mod ends up in `BepInEx/plugins/` (client part) and `SPT_Runtime/user/mods/KaansQoL/` (server part).
    On Windows, make sure "Extract All" does not add an extra subfolder.
@@ -193,4 +193,4 @@ Bugs and questions: [GitHub issues](https://github.com/Kaanori/spt-kaansqol/issu
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/Kaanori/spt-kaansqol/blob/main/LICENSE).
