@@ -8,7 +8,7 @@
     <TargetFramework>net471</TargetFramework>
     <AssemblyName>KaansQoL</AssemblyName>
     <RootNamespace>KaansQoL</RootNamespace>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <LangVersion>latest</LangVersion>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

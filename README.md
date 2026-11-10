@@ -17,7 +17,7 @@ bug, please open an [issue](https://github.com/Kaanori/spt-kaansqol/issues).
 
 ## Installation
 
-1. Download `KaansQoL-1.1.0.zip` from the [Releases](https://github.com/Kaanori/spt-kaansqol/releases) page.
+1. Download `KaansQoL-1.2.0.zip` from the [Releases](https://github.com/Kaanori/spt-kaansqol/releases) page.
 2. Extract it **into your SPT game folder** (the folder that contains `EscapeFromTarkov.exe`).
    The ZIP already has the right layout; the mod ends up in `BepInEx/plugins/` (client part) and `SPT_Runtime/user/mods/KaansQoL/` (server part).
    On Windows, make sure "Extract All" does not add an extra subfolder.
@@ -52,7 +52,7 @@ Delete the mod's files from `BepInEx/plugins/` (client part) and `SPT_Runtime/us
 | | |
 |---|---|
 | **Tested with** | SPT 4.1.6 (EFT `0.16.9.40743`), BepInEx 5, developed and played on Linux (Proton). The server part also runs on Windows. |
-| **Client** | `KaansQoL.dll` -> `BepInEx/plugins/KaansQoL/` (GUID `com.kaan.qol`, version 1.0.1) |
+| **Client** | `KaansQoL.dll` -> `BepInEx/plugins/KaansQoL/` (GUID `com.kaan.qol`, version 1.2.0) |
 | **Server** | `KaansQoL.Server.dll` -> `SPT_Runtime/user/mods/KaansQoL/` (net10, SPT 4.1) |
 | **Optional partners** | DynamicMaps (module 12), Trenchfoot-BeltSlot (module 11), Manimal's Icebreaker (module 10), ORBIT (module 09, only for the bot lock-out) - a module whose partner is missing simply stays off |
 | **License** | MIT |
@@ -78,6 +78,9 @@ Every module is on by default (except where noted). F12 -> sections `01` ... `13
 | **11 Belt Slot Fix** | GuertelFix | Fixes the corpse view of the Pack 'n' Strap belt slot mod (Trenchfoot-BeltSlot): stale windows of the previous body no longer shine through. Needs Trenchfoot-BeltSlot. |
 | **12 Map Arrow Tip** | PfeilSpitze | DynamicMaps arrows point with their *tip* at your position and rotate around the tip. Needs DynamicMaps. |
 | **13 Magazine Swap** | *new* | See below. |
+| **14 Zone Kills** | ZonenKills | A kill counts for zone quests while *you* stand in the zone, wherever the enemy is. |
+| **15 Dialogue Consequences** | GespraechsFolgen | Shows under each VisitAPI answer which quests it completes, fails or unlocks. Needs VisitAPI. |
+| **16 Smooth Sun** | *new in 1.2.0* | The sunlight and all sun shadows glide every frame between the game's sun updates instead of jumping every 1 s / 0.5 s / 0.1 s (shadow quality Low / Medium / High). Idle on Ultra. Optional own update interval, jump threshold, log line. |
 
 ### 13 Magazine Swap (new)
 
@@ -108,7 +111,7 @@ Replaces the two server mods **BalsamDauer** and **AlleAusgaenge**. Settings liv
 ```
 
 * **balsamDuration** - Golden Star Balm keeps its Pain/RadExposure effects for `minutes` (vanilla 5:50 / 6:40 min). The tiny per-second energy/hydration buffs are deliberately not stretched.
-* **allExtracts** - every extract of every map is always reachable: chance 100 %, all entry points merged, time windows opened (trains stay excluded).
+* **allExtracts** - every extract of every map is always reachable: chance 100 %, all entry points merged, time windows opened (trains stay excluded). `exceptions` (since 1.2.0) lists extract names that are left as they are; default `E6` = Streets "Scav Checkpoint", which sits right next to the Labs transit and would pull you out before you reach the transit door.
 
 On the first start without a `config.json` the values of the old `user/mods/BalsamDauer/balsam.json` and `user/mods/AlleAusgaenge/ausgaenge.json` are copied over (log line `Migrated N settings from ...`); the old files are never changed or deleted. If you already moved the old server mod folders away, copy `balsam.json` / `ausgaenge.json` into `user/mods/KaansQoL/` before the first start - they are picked up from there too (`installieren.sh` does this). If an old server mod is still installed next to it, a warning is logged (both would apply the same change - harmless but redundant).
 

@@ -35,6 +35,10 @@ public sealed class AusgangsEinstellungen
 	public bool Chance { get; set; } = true;
 	public bool EntryPoints { get; set; } = true;
 	public bool TimeWindows { get; set; } = true;
+	/// <summary>Ausgangsnamen (base.json "Name"), die NICHT angefasst werden. E6 = Streets "Scav Checkpoint":
+	/// BSG hat ihn auf 0 % gestellt, er liegt 4 m neben dem Durchgang nach Labs und zieht einen sonst raus,
+	/// bevor man die Durchgangstuer erreicht (Kaan, 08.11.2026).</summary>
+	public List<string> Exceptions { get; set; } = new() { "E6" };
 }
 
 public sealed class FehlschlagEinstellungen
@@ -150,7 +154,7 @@ public static class Einstellungen
 				{
 					["_hint"] = "Kaan's QoL (server part). Takes effect on the next server start, no rebuild needed. "
 						+ "balsamDuration: minutes = how long Golden Star Balm effects last, effects = which damage effects get that duration. "
-						+ "allExtracts: makes every extract always reachable (chance 100 %, all entry points, time windows open; trains stay excluded). "
+						+ "allExtracts: makes every extract always reachable (chance 100 %, all entry points, time windows open; trains stay excluded; exceptions = extract names left as they are, default E6 = Streets Scav Checkpoint, which sits on the Labs transit). "
 						+ "noQuestFailures: quests no longer fail by playing (kills, death, reputation, time limits); story branches (quest-vs-quest, dialogue choices) are kept on purpose. "
 						+ "Set enabled to false to switch it off. exceptions = quest ids or internal names that are not touched; liftSingleRaid / noWaitTimes are extra and off by default."
 				};

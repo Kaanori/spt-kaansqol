@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 - 2026-11-09
+
+**New module**
+- **16 Smooth Sun**: the sunlight (and with it all sun shadows) glides every frame between the game's sun updates instead of
+  jumping every 1 s / 0.5 s / 0.1 s (Shadows quality Low / Medium / High). Same method the game uses itself on Ultra; idle on Ultra.
+  Optional own update interval, jump threshold for time skips, diagnostics line in the log.
+- Offline test: 16 modules.
+
+**Changed (server part)**
+- **All extracts**: new `exceptions` list (extract names left untouched). Default `E6` = Streets "Scav Checkpoint": BSG set it to 0 % and it sits 4 m next to the Labs transit, pulling you out before you reach the transit door.
+
 ## 1.1.0 - 2026-11-08
 
 Three more of the author's mods moved in. Client plugin `com.kaan.qol` + server mod `KaansQoL`, both 1.1.0.

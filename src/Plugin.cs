@@ -9,7 +9,8 @@
 //  "Magazine Swap" mit. Seit 1.1.0 gehoeren die Aufgaben-Module
 //  (ZonenKills, GespraechsFolgen) dazu; der Server-Teil bringt
 //  zusaetzlich "Kein Aufgaben-Fehlschlag" und den Datenpunkt fuer
-//  die Gespraechsfolgen mit (siehe Server/).
+//  die Gespraechsfolgen mit (siehe Server/). Seit 1.2.0 neu:
+//  "Smooth Sun" (SonneGlatt) - Sonnenlicht gleitet statt zu springen.
 //
 //  So funktioniert es:
 //   - Jedes Modul steht in src/Module/<Name>/ und hat in F12 eine
@@ -59,7 +60,7 @@ namespace KaansQoL
 	public class Plugin : BaseUnityPlugin
 	{
 		internal const string Guid = "com.kaan.qol";
-		internal const string Version = "1.1.0";
+		internal const string Version = "1.2.0";
 
 		internal static ManualLogSource Log;
 
@@ -119,7 +120,8 @@ namespace KaansQoL
 				new PfeilSpitze.PfeilSpitzeModule(),
 				new MagazineSwap.MagazineSwapModule(),
 				new ZonenKills.ZonenKillsModule(),
-				new GespraechsFolgen.GespraechsFolgenModule()
+				new GespraechsFolgen.GespraechsFolgenModule(),
+				new SonneGlatt.SonneGlattModule()
 			};
 
 			HashSet<ConfigDefinition> vorher = Migration.Vorhandene(cfg);

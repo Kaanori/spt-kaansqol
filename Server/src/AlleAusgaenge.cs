@@ -38,7 +38,7 @@ internal static class AlleAusgaenge
 		bool chance = einst.Chance, einstiege = einst.EntryPoints, zeitfenster = einst.TimeWindows;
 
 		int karten_ = 0, ausgaenge = 0;
-		int gesetztChance = 0, gesetztEinstieg = 0, gesetztZeit = 0, zuege = 0;
+		int ausgenommen = 0, gesetztChance = 0, gesetztEinstieg = 0, gesetztZeit = 0, zuege = 0;
 
 		foreach (var (name, ort) in karten.GetDictionary())
 		{
@@ -64,6 +64,11 @@ internal static class AlleAusgaenge
 			foreach (var a in liste)
 			{
 				ausgaenge++;
+				if (einst.Exceptions != null && einst.Exceptions.Any(x => string.Equals(x?.Trim(), a.Name, StringComparison.OrdinalIgnoreCase)))
+				{
+					ausgenommen++;
+					continue;
+				}
 				var istZug = (a.Name ?? "").Contains("train",
 								 StringComparison.OrdinalIgnoreCase);
 				if (istZug) zuege++;
@@ -105,6 +110,6 @@ internal static class AlleAusgaenge
 
 		logger.Success($"[Alle Ausgaenge] {ausgaenge} Ausgaenge auf {karten_} Karten: "
 					   + $"Chance {gesetztChance}, Einstiegspunkte {gesetztEinstieg}, "
-					   + $"Zeitfenster {gesetztZeit} (Zuege ausgenommen: {zuege}).");
+					   + $"Zeitfenster {gesetztZeit} (Zuege ausgenommen: {zuege}, per Ausnahmeliste unveraendert: {ausgenommen}).");
 	}
 }
